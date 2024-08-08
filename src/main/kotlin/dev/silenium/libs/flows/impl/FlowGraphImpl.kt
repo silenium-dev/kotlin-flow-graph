@@ -91,7 +91,7 @@ internal class FlowGraphImpl(private val coroutineScope: CoroutineScope) :
         elements.forEach(AutoCloseable::close)
     }
 
-    data object CoroutineContextKey : CoroutineContext.Key<CoroutineContextElement>
+    object CoroutineContextKey : CoroutineContext.Key<CoroutineContextElement>
     data class CoroutineContextElement(
         val flowGraph: FlowGraph,
         override val key: CoroutineContext.Key<*> = CoroutineContextKey
