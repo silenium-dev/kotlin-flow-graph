@@ -1,7 +1,6 @@
 package dev.silenium.libs.flows.test
 
 import dev.silenium.libs.flows.api.FlowItem
-import dev.silenium.libs.flows.api.Sink
 import dev.silenium.libs.flows.api.Transformer
 import dev.silenium.libs.flows.base.SourceBase
 import kotlinx.coroutines.*

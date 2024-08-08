@@ -2,7 +2,9 @@ package dev.silenium.libs.flows.test
 
 import dev.silenium.libs.flows.api.FlowItem
 import dev.silenium.libs.flows.api.Sink
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class BufferSink<T, P>(vararg pads: Pair<UInt, P>) : Sink<T, P> {
     private val inputMetadata_: MutableMap<UInt, P?> = pads.toMap().toMutableMap()

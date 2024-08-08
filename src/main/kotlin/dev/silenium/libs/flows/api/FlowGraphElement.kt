@@ -12,4 +12,5 @@ interface FlowGraphElement<T : Any> : AutoCloseable {
 
 interface SourceFlowGraphElement<T, P, S : Source<T, P>> : FlowGraphElement<S>, Source<T, P>
 interface SinkFlowGraphElement<T, P, S : Sink<T, P>> : FlowGraphElement<S>, Sink<T, P>
-interface TransformerFlowGraphElement<IT, IP, OT, OP, T : Transformer<IT, IP, OT, OP>> : FlowGraphElement<T>, Transformer<IT, IP, OT, OP>
+interface TransformerFlowGraphElement<IT, IP, OT, OP, T : Transformer<IT, IP, OT, OP>> :
+    FlowGraphElement<T>, Transformer<IT, IP, OT, OP>

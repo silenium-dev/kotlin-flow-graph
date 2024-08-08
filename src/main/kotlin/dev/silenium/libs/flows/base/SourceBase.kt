@@ -1,8 +1,8 @@
 package dev.silenium.libs.flows.base
 
-import dev.silenium.libs.flows.impl.CloningFlow
 import dev.silenium.libs.flows.api.FlowItem
 import dev.silenium.libs.flows.api.Source
+import dev.silenium.libs.flows.impl.CloningFlow
 import java.util.*
 
 abstract class SourceBase<T, P> : Source<T, P> {
