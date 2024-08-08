@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.0.0"
+    id("org.jetbrains.kotlinx.atomicfu") version "0.25.0"
 }
 
 group = "dev.silenium.playground"
@@ -16,6 +17,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk9:$coroutines")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutines")
+
+    implementation("org.jetbrains.kotlinx:atomicfu:0.25.0")
 
     val kotest = "5.9.0"
     testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotest")

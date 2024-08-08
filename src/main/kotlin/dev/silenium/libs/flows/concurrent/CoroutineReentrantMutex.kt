@@ -1,3 +1,5 @@
+package dev.silenium.libs.flows.concurrent
+
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext

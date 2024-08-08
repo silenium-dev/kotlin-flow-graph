@@ -1,3 +1,7 @@
+package dev.silenium.libs.flows.impl
+
+import dev.silenium.libs.flows.api.ReferenceCounted
+import dev.silenium.libs.flows.concurrent.withReentrantLock
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
@@ -6,7 +10,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.resume
 
-class CloningFlow<T>(private val wrapped: Flow<T>? = null) : Flow<T>, AutoCloseable {
+/**
+ * Every collector must close its items when it's done with them,
+ * as the flow will pass individual instances to each collector.
+ */
+class CloningFlow<T : ReferenceCounted<T>>(private val wrapped: Flow<T>? = null) : Flow<T>, AutoCloseable {
     private val idCounter = AtomicLong(0L)
     private val collectors = ConcurrentHashMap<Long, FlowCollector<T>>()
     private val finished = CompletableDeferred<Unit>()
@@ -22,14 +30,13 @@ class CloningFlow<T>(private val wrapped: Flow<T>? = null) : Flow<T>, AutoClosea
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
+    /**
+     * *Note: thread-safe*
+     */
     suspend fun publish(value: T): Unit = publishLock.withReentrantLock {
         coroutineScope {
             collectors.map { (_, collector) ->
-                val item = when {
-                    value is ReferenceCounted<*> -> value.clone().getOrThrow() as T
-                    else -> value
-                }
+                val item = value.clone().getOrThrow()
                 launch {
                     collector.emit(item)
                 }
