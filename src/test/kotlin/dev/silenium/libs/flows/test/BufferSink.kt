@@ -15,7 +15,7 @@ class BufferSink<T, P>(vararg pads: Pair<UInt, P>) : Sink<T, P> {
     private val flow_ = MutableStateFlow<Map<UInt, List<FlowItem<T, P>>>>(emptyMap())
     val flow: StateFlow<Map<UInt, List<FlowItem<T, P>>>> = flow_.asStateFlow()
 
-    override suspend fun submit(item: FlowItem<T, P>): Result<Unit> {
+    override suspend fun receive(item: FlowItem<T, P>): Result<Unit> {
         buffer_.getOrPut(item.pad, ::mutableListOf).add(item)
         flow_.emit(buffer)
         return Result.success(Unit)

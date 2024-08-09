@@ -35,7 +35,7 @@ class Base64Decoder : SourceBase<ByteArray, DataType>(), Transformer<Base64Buffe
         return Result.success(Unit)
     }
 
-    override suspend fun submit(item: FlowItem<Base64Buffer, DataType>): Result<Unit> = runCatching {
+    override suspend fun receive(item: FlowItem<Base64Buffer, DataType>): Result<Unit> = runCatching {
         queue.send(FlowItem(item.pad, DataType.PLAIN, item.value))
     }
 

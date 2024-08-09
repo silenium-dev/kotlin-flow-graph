@@ -18,12 +18,12 @@ interface Sink<T, P> : FlowCollector<FlowItem<T, P>>, AutoCloseable {
 
     fun configure(pad: UInt, metadata: P): Result<Unit>
 
-    suspend fun submit(item: FlowItem<T, P>): Result<Unit>
+    suspend fun receive(item: FlowItem<T, P>): Result<Unit>
 
     override suspend fun emit(value: FlowItem<T, P>) {
         check(inputMetadata.containsKey(value.pad)) { "pad not configured" }
         check(inputMetadata[value.pad] == value.metadata) { "metadata mismatch" }
 
-        submit(value).getOrThrow()
+        receive(value).getOrThrow()
     }
 }
