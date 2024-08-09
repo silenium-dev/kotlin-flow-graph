@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     kotlin("jvm") version "2.0.10"
+    `maven-publish`
 }
 
 group = "dev.silenium.libs.flow-graph"
@@ -45,4 +46,26 @@ tasks.compileTestKotlin {
 
 kotlin {
     jvmToolchain(8)
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
+    repositories {
+        val url = System.getenv("MAVEN_REPO_URL") ?: return@repositories
+        maven(url) {
+            name = "reposilite"
+            credentials {
+                username = System.getenv("MAVEN_REPO_USERNAME") ?: ""
+                password = System.getenv("MAVEN_REPO_PASSWORD") ?: ""
+            }
+        }
+    }
 }
