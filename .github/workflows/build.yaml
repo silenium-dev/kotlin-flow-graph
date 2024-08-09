@@ -16,19 +16,6 @@ permissions:
   pull-requests: write
   contents: write
 jobs:
-  linux-x86_64:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: silenium-dev/actions/jni-natives/ubuntu@main
-        with:
-          gradle-cache-encryption-key: ${{ secrets.GRADLE_CACHE_ENCRYPTION_KEY }}
-          snapshot-repo-url: "https://reposilite.silenium.dev/snapshots"
-          release-repo-url: "https://reposilite.silenium.dev/releases"
-          repo-username: ${{ secrets.REPOSILITE_USERNAME }}
-          repo-password: ${{ secrets.REPOSILITE_PASSWORD }}
-          tests: false
-          java-version: 11
-          platform: ${{ github.job }}
   kotlin:
     runs-on: ubuntu-22.04
     steps:
