@@ -5,8 +5,8 @@ plugins {
     kotlin("jvm") version "2.0.10"
 }
 
-group = "dev.silenium.playground"
-version = "1.0-SNAPSHOT"
+group = "dev.silenium.libs.flow-graph"
+version = findProperty("deploy.version") as String? ?: "0.0.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
