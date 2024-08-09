@@ -30,9 +30,12 @@ class SourceBaseTest : FunSpec({
         val job = CoroutineScope(Dispatchers.Default).launch {
             bufferSource.flow.collect(decoder)
         }
+        val started = CompletableDeferred<Unit>()
         val listAsync = async(Dispatchers.Default) {
+            started.complete(Unit)
             decoder.flow.toList()
         }
+        started.await()
         val bufs = inputs.map { input ->
             val base64 = Base64.encode(input.encodeToByteArray())
             val byteBuffer = ByteBuffer.allocateDirect(base64.length)

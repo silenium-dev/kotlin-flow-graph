@@ -1,9 +1,7 @@
 package dev.silenium.libs.flows.impl
 
 import dev.silenium.libs.flows.api.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
@@ -98,16 +96,37 @@ internal class FlowGraphImpl(private val coroutineScope: CoroutineScope) :
     ) : CoroutineContext.Element
 }
 
-internal class FlowGraphBuilderImpl(private val flowGraph: FlowGraph) : FlowGraphBuilder, FlowGraph by flowGraph
+internal class FlowGraphBuilderImpl(private val flowGraph: FlowGraph) : FlowGraphBuilder, FlowGraph by flowGraph {
+    private val connectionStarted = mutableSetOf<Job>()
+
+    override fun <T, P> Source<T, P>.connectTo(sink: Sink<T, P>): Result<Job> {
+        outputMetadata.forEach { (pad, metadata) ->
+            sink.configure(pad, metadata).onFailure {
+                return Result.failure(IllegalStateException("Unable to configure input pad $pad of sink $sink", it))
+            }
+        }
+        val started = CompletableDeferred<Unit>()
+        return launch {
+            started.complete(Unit)
+            flow.collect(sink)
+        }.also {
+            connectionStarted.add(started)
+        }.let { Result.success(it) }
+    }
+
+    override suspend fun finalize(): Result<Unit> = runCatching {
+        connectionStarted.joinAll()
+    }
+}
 
 internal fun FlowGraph.builder() = FlowGraphBuilderImpl(this)
 
-fun FlowGraph(
+suspend fun FlowGraph(
     coroutineContext: CoroutineContext = Dispatchers.Default,
     block: FlowGraphBuilder.() -> Unit,
-): FlowGraph = FlowGraphImpl(coroutineContext).builder().apply(block)
+): FlowGraph = FlowGraphImpl(coroutineContext).builder().apply(block).apply { finalize() }
 
-fun FlowGraph(
+suspend fun FlowGraph(
     coroutineScope: CoroutineScope,
     block: FlowGraphBuilder.() -> Unit,
-): FlowGraph = FlowGraphImpl(coroutineScope).builder().apply(block)
+): FlowGraph = FlowGraphImpl(coroutineScope).builder().apply(block).apply { finalize() }

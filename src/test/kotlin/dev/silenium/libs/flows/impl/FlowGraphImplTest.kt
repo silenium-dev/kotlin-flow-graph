@@ -13,7 +13,7 @@ class FlowGraphImplTest : FunSpec({
     test("FlowGraphBuilder") {
         val graph = FlowGraph(CoroutineScope(Dispatchers.Default)) {
             val source = source(BufferSource<Base64Buffer, DataType>(0u to DataType.BASE64), "buffer-source")
-            val sink = sink(BufferSink<ByteArray, DataType>(0u to DataType.PLAIN), "buffer-sink")
+            val sink = sink(BufferSink<ByteArray, DataType>(), "buffer-sink")
             val decoder = transformer(Base64Decoder(), "base64-decoder")
             source.connectTo(decoder)
             decoder.connectTo(sink)

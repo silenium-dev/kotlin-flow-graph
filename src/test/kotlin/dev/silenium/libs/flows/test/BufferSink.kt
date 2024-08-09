@@ -12,7 +12,7 @@ class BufferSink<T, P>(vararg pads: Pair<UInt, P>) : Sink<T, P> {
 
     private val buffer_: MutableMap<UInt, MutableList<FlowItem<T, P>>> = mutableMapOf()
     val buffer: Map<UInt, List<FlowItem<T, P>>> by ::buffer_
-    val flow_ = MutableStateFlow<Map<UInt, List<FlowItem<T, P>>>>(emptyMap())
+    private val flow_ = MutableStateFlow<Map<UInt, List<FlowItem<T, P>>>>(emptyMap())
     val flow: StateFlow<Map<UInt, List<FlowItem<T, P>>>> = flow_.asStateFlow()
 
     override suspend fun submit(item: FlowItem<T, P>): Result<Unit> {
