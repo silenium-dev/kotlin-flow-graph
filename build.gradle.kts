@@ -16,14 +16,12 @@ repositories {
 dependencies {
     val coroutines = "1.8.1"
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-debug:$coroutines")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutines")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:$coroutines")
 
     val kotest = "5.9.1"
     testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotest")
     testImplementation("io.kotest:kotest-assertions-core-jvm:$kotest")
     testImplementation("io.kotest:kotest-property-jvm:$kotest")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:$coroutines")
 }
 
 tasks.test {
