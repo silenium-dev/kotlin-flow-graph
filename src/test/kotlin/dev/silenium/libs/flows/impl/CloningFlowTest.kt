@@ -1,6 +1,6 @@
 package dev.silenium.libs.flows.impl
 
-import dev.silenium.libs.flows.api.ReferenceCounted
+import dev.silenium.libs.flows.api.Reference
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference
 class TestData(
     val buf: AtomicReference<ByteArray?>,
     private val refCount_: AtomicLong = AtomicLong(0L)
-) : ReferenceCounted<TestData> {
+) : Reference<TestData> {
     constructor(data: ByteArray) : this(AtomicReference(data))
 
     init {

@@ -9,6 +9,11 @@ import kotlin.contracts.contract
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
+/**
+ * Executes the given [block] with this mutex locked.
+ * If the mutex is already locked in the current context, the [block] is executed immediately.
+ * Otherwise, this function suspends until this mutex is unlocked and then locks it.
+ */
 @OptIn(ExperimentalContracts::class)
 suspend inline fun <T> Mutex.withReentrantLock(crossinline block: suspend () -> T): T {
     contract {
@@ -22,10 +27,12 @@ suspend inline fun <T> Mutex.withReentrantLock(crossinline block: suspend () -> 
     }
 }
 
-class ReentrantMutexContextElement(
+@PublishedApi
+internal class ReentrantMutexContextElement(
     override val key: ReentrantMutexContextKey
 ) : CoroutineContext.Element
 
-data class ReentrantMutexContextKey(
+@PublishedApi
+internal data class ReentrantMutexContextKey(
     val mutex: Mutex
 ) : CoroutineContext.Key<ReentrantMutexContextElement>

@@ -1,12 +1,12 @@
 package dev.silenium.libs.flows.test
 
-import dev.silenium.libs.flows.api.ReferenceCounted
+import dev.silenium.libs.flows.api.Reference
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-class Base64Buffer : ReferenceCounted<Base64Buffer> {
+class Base64Buffer : Reference<Base64Buffer> {
     private val refCount_: AtomicLong
     val refCount: Long get() = refCount_.get()
     val buffer: ByteBuffer

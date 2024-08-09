@@ -57,29 +57,29 @@ internal class FlowGraphImpl(private val coroutineScope: CoroutineScope) :
         return element
     }
 
-    override fun <S : Sink<*, *>> sink(name: String): FlowGraphElement<S>? {
+    override fun <S : Sink<*, *>> sink(name: String): SinkFlowGraphElement<*, *, S>? {
         val element = elements.find { it.name == name } ?: return null
         if (element is SinkFlowGraphElement<*, *, *>) {
             @Suppress("UNCHECKED_CAST")
-            return element as FlowGraphElement<S>
+            return element as SinkFlowGraphElement<*, *, S>
         }
         throw IllegalArgumentException("Element $name is not a sink")
     }
 
-    override fun <S : Source<*, *>> source(name: String): FlowGraphElement<S>? {
+    override fun <S : Source<*, *>> source(name: String): SourceFlowGraphElement<*, *, S>? {
         val element = elements.find { it.name == name } ?: return null
         if (element is SourceFlowGraphElement<*, *, *>) {
             @Suppress("UNCHECKED_CAST")
-            return element as FlowGraphElement<S>
+            return element as SourceFlowGraphElement<*, *, S>
         }
         throw IllegalArgumentException("Element $name is not a source")
     }
 
-    override fun <T : Transformer<*, *, *, *>> transformer(name: String): FlowGraphElement<T>? {
+    override fun <T : Transformer<*, *, *, *>> transformer(name: String): TransformerFlowGraphElement<*, *, *, *, T>? {
         val element = elements.find { it.name == name } ?: return null
         if (element is TransformerFlowGraphElement<*, *, *, *, *>) {
             @Suppress("UNCHECKED_CAST")
-            return element as FlowGraphElement<T>
+            return element as TransformerFlowGraphElement<*, *, *, *, T>
         }
         throw IllegalArgumentException("Element $name is not a transformer")
     }
@@ -96,7 +96,8 @@ internal class FlowGraphImpl(private val coroutineScope: CoroutineScope) :
     ) : CoroutineContext.Element
 }
 
-internal class FlowGraphBuilderImpl(private val flowGraph: FlowGraph) : FlowGraphBuilder, FlowGraph by flowGraph {
+internal class FlowGraphConfigScopeImpl(private val flowGraph: FlowGraph) : FlowGraphConfigScope,
+    FlowGraph by flowGraph {
     private val connectionStarted = mutableSetOf<Job>()
 
     override fun <T, P> Source<T, P>.connectTo(sink: Sink<T, P>): Result<Job> {
@@ -114,19 +115,41 @@ internal class FlowGraphBuilderImpl(private val flowGraph: FlowGraph) : FlowGrap
         }.let { Result.success(it) }
     }
 
-    override suspend fun finalize(): Result<Unit> = runCatching {
+    override suspend fun configure(): Result<Unit> = runCatching {
         connectionStarted.joinAll()
     }
 }
 
-internal fun FlowGraph.builder() = FlowGraphBuilderImpl(this)
+internal fun FlowGraph.builder() = FlowGraphConfigScopeImpl(this)
 
+/**
+ * Creates a new [FlowGraph] with the given [coroutineScope] and [block] configuration.
+ * The [block] is executed in the context of the [FlowGraphConfigScope].
+ * The [FlowGraph] is configured after the [block] is executed.
+ * @param coroutineContext The [CoroutineContext] to use.
+ * @param block The configuration block.
+ * @return A [FlowGraph] instance.
+ * @see FlowGraphConfigScope
+ * @see FlowGraph
+ * @see CoroutineContext
+ */
 suspend fun FlowGraph(
     coroutineContext: CoroutineContext = Dispatchers.Default,
-    block: FlowGraphBuilder.() -> Unit,
-): FlowGraph = FlowGraphImpl(coroutineContext).builder().apply(block).apply { finalize() }
+    block: FlowGraphConfigScope.() -> Unit,
+): FlowGraph = FlowGraphImpl(coroutineContext).builder().apply(block).apply { configure() }
 
+/**
+ * Creates a new [FlowGraph] with the given [coroutineScope] and [block] configuration.
+ * The [block] is executed in the context of the [FlowGraphConfigScope].
+ * The [FlowGraph] is configured after the [block] is executed.
+ * @param coroutineScope The [CoroutineScope] to use.
+ * @param block The configuration block.
+ * @return A [FlowGraph] instance.
+ * @see FlowGraphConfigScope
+ * @see FlowGraph
+ * @see CoroutineScope
+ */
 suspend fun FlowGraph(
     coroutineScope: CoroutineScope,
-    block: FlowGraphBuilder.() -> Unit,
-): FlowGraph = FlowGraphImpl(coroutineScope).builder().apply(block).apply { finalize() }
+    block: FlowGraphConfigScope.() -> Unit,
+): FlowGraph = FlowGraphImpl(coroutineScope).builder().apply(block).apply { configure() }
