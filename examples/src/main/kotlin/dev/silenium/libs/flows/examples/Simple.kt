@@ -15,8 +15,8 @@ data class MyMetadata(val negativeNumbers: Boolean)
 class MySource : SourceBase<MyData, MyMetadata>() {
     init {
         // Create two output pads, one for positive numbers and one for negative numbers
-        metadata[0u] = MyMetadata(false)
-        metadata[1u] = MyMetadata(true)
+        outputMetadata_[0u] = MyMetadata(false)
+        outputMetadata_[1u] = MyMetadata(true)
     }
 
     // Publish numbers from 0 to 100
@@ -24,9 +24,9 @@ class MySource : SourceBase<MyData, MyMetadata>() {
     suspend fun run() {
         for (i in 0..100) {
             if (i % 2 == 0) {
-                publish(FlowItem(0u, metadata[0u]!!, MyData(i)))
+                publish(FlowItem(0u, outputMetadata_[0u]!!, MyData(i)))
             } else {
-                publish(FlowItem(1u, metadata[1u]!!, MyData(i)))
+                publish(FlowItem(1u, outputMetadata_[1u]!!, MyData(i)))
             }
         }
     }
@@ -39,7 +39,7 @@ class MyTransformer : Transformer<MyData, MyMetadata, MyData, MyMetadata>, Sourc
 
     override fun configure(pad: UInt, metadata: MyMetadata): Result<Unit> {
         inputMetadata_[pad] = metadata
-        this.metadata[pad] = metadata
+        this.outputMetadata_[pad] = metadata
         return Result.success(Unit)
     }
 

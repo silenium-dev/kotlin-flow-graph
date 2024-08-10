@@ -31,7 +31,7 @@ class Base64Decoder : SourceBase<ByteArray, DataType>(), Transformer<Base64Buffe
     override fun configure(pad: UInt, metadata: DataType): Result<Unit> {
         check(metadata == DataType.BASE64) { "metadata must be BASE64" }
         this.inputMetadata[pad] = metadata
-        this.metadata[pad] = DataType.PLAIN
+        this.outputMetadata_[pad] = DataType.PLAIN
         return Result.success(Unit)
     }
 
