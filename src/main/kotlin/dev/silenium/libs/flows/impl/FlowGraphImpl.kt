@@ -3,6 +3,9 @@ package dev.silenium.libs.flows.impl
 import dev.silenium.libs.flows.api.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.map
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
@@ -147,10 +150,14 @@ internal fun FlowGraph.builder() = FlowGraphConfigScopeImpl(this)
  * @see FlowGraph
  * @see CoroutineContext
  */
+@OptIn(ExperimentalContracts::class)
 suspend fun FlowGraph(
     coroutineContext: CoroutineContext = Dispatchers.Default,
     block: FlowGraphConfigScope.() -> Unit,
-): FlowGraph = FlowGraphImpl(coroutineContext).builder().apply(block).configure().getOrThrow()
+): FlowGraph {
+    contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
+    return FlowGraphImpl(coroutineContext).builder().apply(block).configure().getOrThrow()
+}
 
 /**
  * Creates a new [FlowGraph] with the given [coroutineScope] and [block] configuration.
@@ -163,7 +170,11 @@ suspend fun FlowGraph(
  * @see FlowGraph
  * @see CoroutineScope
  */
+@OptIn(ExperimentalContracts::class)
 suspend fun FlowGraph(
     coroutineScope: CoroutineScope,
     block: FlowGraphConfigScope.() -> Unit,
-): FlowGraph = FlowGraphImpl(coroutineScope).builder().apply(block).configure().getOrThrow()
+): FlowGraph {
+    contract { callsInPlace(block, InvocationKind.EXACTLY_ONCE) }
+    return FlowGraphImpl(coroutineScope).builder().apply(block).configure().getOrThrow()
+}

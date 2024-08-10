@@ -1,5 +1,6 @@
 package dev.silenium.libs.flows.impl
 
+import dev.silenium.libs.flows.api.SourceFlowGraphElement
 import dev.silenium.libs.flows.buffer.BufferSink
 import dev.silenium.libs.flows.buffer.BufferSource
 import dev.silenium.libs.flows.test.Base64Buffer
@@ -16,8 +17,9 @@ import kotlinx.coroutines.flow.firstOrNull
 
 class FlowGraphImplTest : FunSpec({
     test("FlowGraphBuilder") {
+        val source: SourceFlowGraphElement<Base64Buffer, DataType, BufferSource<Base64Buffer, DataType>>
         val graph = FlowGraph(CoroutineScope(Dispatchers.Default)) {
-            val source = source(BufferSource<Base64Buffer, DataType>(0u to DataType.BASE64), "buffer-source")
+            source = source(BufferSource(0u to DataType.BASE64), "buffer-source")
             val sink = sink(BufferSink<ByteArray, DataType>(), "buffer-sink")
             val decoder = transformer(Base64Decoder(), "base64-decoder")
             connect(source to decoder)
@@ -25,7 +27,6 @@ class FlowGraphImplTest : FunSpec({
                 sourcePad + 1u
             }
         }
-        val source = graph.source<BufferSource<Base64Buffer, DataType>>("buffer-source")!!
         val sink = graph.sink<BufferSink<ByteArray, DataType>>("buffer-sink")!!
 
         val input = "test"
