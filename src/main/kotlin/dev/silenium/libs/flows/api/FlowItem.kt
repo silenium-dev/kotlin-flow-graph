@@ -17,16 +17,16 @@ data class FlowItem<T, P>(val pad: UInt, val metadata: P, val value: T) : Refere
      * If value and/or metadata are [Reference], they are cloned as well.
      */
     @Suppress("UNCHECKED_CAST")
-    override fun clone(): Result<FlowItem<T, P>> {
+    override fun clone(): Result<FlowItem<T, P>> = runCatching {
         val clonedValue = when (value) {
-            is Reference<*> -> value.clone() as T
+            is Reference<*> -> value.clone().getOrThrow() as T
             else -> value
         }
         val clonedMetadata = when (metadata) {
-            is Reference<*> -> metadata.clone() as P
+            is Reference<*> -> metadata.clone().getOrThrow() as P
             else -> metadata
         }
-        return Result.success(FlowItem(pad, clonedMetadata, clonedValue))
+        FlowItem(pad, clonedMetadata, clonedValue)
     }
 
     /**
