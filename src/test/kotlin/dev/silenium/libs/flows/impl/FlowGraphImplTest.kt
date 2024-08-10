@@ -20,8 +20,10 @@ class FlowGraphImplTest : FunSpec({
             val source = source(BufferSource<Base64Buffer, DataType>(0u to DataType.BASE64), "buffer-source")
             val sink = sink(BufferSink<ByteArray, DataType>(), "buffer-sink")
             val decoder = transformer(Base64Decoder(), "base64-decoder")
-            source.connectTo(decoder)
-            decoder.connectTo(sink)
+            connect(source to decoder)
+            connect(decoder to sink) { _, _, sourcePad, _ ->
+                sourcePad + 1u
+            }
         }
         val source = graph.source<BufferSource<Base64Buffer, DataType>>("buffer-source")!!
         val sink = graph.sink<BufferSink<ByteArray, DataType>>("buffer-sink")!!
@@ -30,9 +32,9 @@ class FlowGraphImplTest : FunSpec({
         val inputBuffer = input.encodeBase64()
         source.impl.submit(0u, inputBuffer)
         inputBuffer.close()
-        val result = sink.impl.flow.firstOrNull { 0u in it && it[0u]!!.isNotEmpty() }
+        val result = sink.impl.flow.firstOrNull { 1u in it && it[1u]!!.isNotEmpty() }
 
         graph.close()
-        result.shouldNotBeNull()[0u]!!.shouldNotBeEmpty().first().value.decodeToString() shouldBe input
+        result.shouldNotBeNull()[1u]!!.shouldNotBeEmpty().first().value.decodeToString() shouldBe input
     }
 })

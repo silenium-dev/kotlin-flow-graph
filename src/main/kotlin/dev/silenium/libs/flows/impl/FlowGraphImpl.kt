@@ -2,6 +2,7 @@ package dev.silenium.libs.flows.impl
 
 import dev.silenium.libs.flows.api.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KClass
 
@@ -98,25 +99,38 @@ internal class FlowGraphImpl(private val coroutineScope: CoroutineScope) :
 
 internal class FlowGraphConfigScopeImpl(private val flowGraph: FlowGraph) : FlowGraphConfigScope,
     FlowGraph by flowGraph {
-    private val connectionStarted = mutableSetOf<Job>()
+    private val configurationJobs = mutableSetOf<Job>()
 
-    override fun <T, P> Source<T, P>.connectTo(sink: Sink<T, P>): Result<Job> {
-        outputMetadata.forEach { (pad, metadata) ->
-            sink.configure(pad, metadata).onFailure {
-                return Result.failure(IllegalStateException("Unable to configure input pad $pad of sink $sink", it))
+    override fun <T, P> connect(
+        pair: Pair<Source<T, P>, Sink<T, P>>,
+        padSelector: (sourceSinkMap: Map<UInt, UInt>, sourcePads: Map<UInt, P>, sourcePad: UInt, metadata: P) -> UInt?,
+    ): Job {
+        val (source, sink) = pair
+        val padMap = mutableMapOf<UInt, UInt>()
+        for ((sourcePad, metadata) in source.outputMetadata) {
+            val sinkPad = padSelector(padMap, source.outputMetadata, sourcePad, metadata) ?: continue
+            padMap[sourcePad] = sinkPad
+        }
+        padMap.forEach { (sourcePad, sinkPad) ->
+            val metadata = source.outputMetadata.getValue(sourcePad)
+            sink.configure(sinkPad, metadata).onFailure {
+                throw IllegalStateException("Unable to configure $sink:$sinkPad from $source:$sourcePad", it)
             }
         }
         val started = CompletableDeferred<Unit>()
         return launch {
             started.complete(Unit)
-            flow.collect(sink)
+            source.flow
+                .map { it.copy(pad = padMap.getValue(it.pad)) }
+                .collect(sink)
         }.also {
-            connectionStarted.add(started)
-        }.let { Result.success(it) }
+            configurationJobs.add(started)
+        }
     }
 
-    override suspend fun configure(): Result<Unit> = runCatching {
-        connectionStarted.joinAll()
+    override suspend fun configure(): Result<FlowGraph> = runCatching {
+        configurationJobs.joinAll()
+        flowGraph
     }
 }
 
@@ -136,7 +150,7 @@ internal fun FlowGraph.builder() = FlowGraphConfigScopeImpl(this)
 suspend fun FlowGraph(
     coroutineContext: CoroutineContext = Dispatchers.Default,
     block: FlowGraphConfigScope.() -> Unit,
-): FlowGraph = FlowGraphImpl(coroutineContext).builder().apply(block).apply { configure() }
+): FlowGraph = FlowGraphImpl(coroutineContext).builder().apply(block).configure().getOrThrow()
 
 /**
  * Creates a new [FlowGraph] with the given [coroutineScope] and [block] configuration.
@@ -152,4 +166,4 @@ suspend fun FlowGraph(
 suspend fun FlowGraph(
     coroutineScope: CoroutineScope,
     block: FlowGraphConfigScope.() -> Unit,
-): FlowGraph = FlowGraphImpl(coroutineScope).builder().apply(block).apply { configure() }
+): FlowGraph = FlowGraphImpl(coroutineScope).builder().apply(block).configure().getOrThrow()

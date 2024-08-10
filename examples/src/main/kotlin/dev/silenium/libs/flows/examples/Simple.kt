@@ -73,8 +73,8 @@ fun main() = runBlocking {
         val processor = transformer(MyTransformer(), "transformer")
         val sink = sink(MySink(), "sink")
 
-        source.connectTo(processor).getOrThrow()
-        processor.connectTo(sink).getOrThrow()
+        connect(source to processor)
+        connect(processor to sink)
     }
     graph.source<MySource>("source")!!.impl.run()
     graph.close()
