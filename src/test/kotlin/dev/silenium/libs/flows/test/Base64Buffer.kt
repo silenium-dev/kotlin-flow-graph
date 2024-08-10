@@ -35,6 +35,7 @@ class Base64Buffer : Reference<Base64Buffer> {
 
     override fun close() {
         println("Decrementing buffer ref count")
+        check(refCount_.get() > 0L) { "Ref count is already 0" }
         if (refCount_.decrementAndGet() == 0L) {
             println("Closing buffer")
             buffer.clear()
