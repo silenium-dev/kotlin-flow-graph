@@ -1,8 +1,8 @@
 package dev.silenium.libs.flows.base
 
+import dev.silenium.libs.flows.buffer.BufferSource
 import dev.silenium.libs.flows.test.Base64Buffer
 import dev.silenium.libs.flows.test.Base64Decoder
-import dev.silenium.libs.flows.test.BufferSource
 import dev.silenium.libs.flows.test.DataType
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldBeIn

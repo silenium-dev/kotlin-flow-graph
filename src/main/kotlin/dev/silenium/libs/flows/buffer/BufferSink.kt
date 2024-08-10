@@ -1,4 +1,4 @@
-package dev.silenium.libs.flows.test
+package dev.silenium.libs.flows.buffer
 
 import dev.silenium.libs.flows.api.FlowItem
 import dev.silenium.libs.flows.api.Sink
