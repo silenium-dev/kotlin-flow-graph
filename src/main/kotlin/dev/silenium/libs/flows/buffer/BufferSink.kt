@@ -17,7 +17,7 @@ class BufferSink<T, P>(vararg pads: Pair<UInt, P>) : Sink<T, P> {
 
     override suspend fun receive(item: FlowItem<T, P>): Result<Unit> {
         buffer_.getOrPut(item.pad, ::mutableListOf).add(item)
-        flow_.emit(buffer)
+        flow_.emit(buffer.entries.associate { it.key to it.value.toList() })
         return Result.success(Unit)
     }
 
