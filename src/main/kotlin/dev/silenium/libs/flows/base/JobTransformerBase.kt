@@ -20,7 +20,7 @@ abstract class JobTransformerBase<IT, IP, OT, OP>(
     protected var job: Job? = null
 
     override fun configure(pad: UInt, metadata: IP): Result<Unit> {
-        if (!inputMetadata_.containsKey(pad)) return Result.failure(IllegalStateException("pad already configured"))
+        if (inputMetadata_.containsKey(pad)) return Result.failure(IllegalStateException("pad already configured"))
         if (pads?.contains(pad) == false) return Result.failure(IllegalStateException("pad not allowed"))
 
         inputMetadata_[pad] = metadata
