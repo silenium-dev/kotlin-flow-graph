@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.toList
 import java.nio.ByteBuffer
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @OptIn(ExperimentalEncodingApi::class)
@@ -36,6 +37,7 @@ class SourceBaseTest : FunSpec({
             decoder.flow.toList()
         }
         started.await()
+        delay(100.milliseconds)
         val bufs = inputs.map { input ->
             val base64 = Base64.encode(input.encodeToByteArray())
             val byteBuffer = ByteBuffer.allocateDirect(base64.length)
@@ -46,8 +48,9 @@ class SourceBaseTest : FunSpec({
             buf.close()
             buf
         }
-        job.cancelAndJoin()
         decoder.close()
+        bufferSource.close()
+        job.join()
         listAsync.await().shouldHaveSize(inputs.size).forEach { item ->
             println(item)
             item.pad shouldBe 0u
