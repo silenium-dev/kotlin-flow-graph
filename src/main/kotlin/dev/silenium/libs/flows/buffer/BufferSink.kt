@@ -2,9 +2,9 @@ package dev.silenium.libs.flows.buffer
 
 import dev.silenium.libs.flows.api.FlowItem
 import dev.silenium.libs.flows.api.Sink
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class BufferSink<T, P>(vararg pads: Pair<UInt, P>) : Sink<T, P> {
     private val inputMetadata_: MutableMap<UInt, P?> = pads.toMap().toMutableMap()
@@ -12,8 +12,8 @@ class BufferSink<T, P>(vararg pads: Pair<UInt, P>) : Sink<T, P> {
 
     private val buffer_: MutableMap<UInt, MutableList<FlowItem<T, P>>> = mutableMapOf()
     val buffer: Map<UInt, List<FlowItem<T, P>>> by ::buffer_
-    private val flow_ = MutableSharedFlow<Map<UInt, List<FlowItem<T, P>>>>(replay = 1)
-    val flow: SharedFlow<Map<UInt, List<FlowItem<T, P>>>> = flow_.asSharedFlow()
+    private val flow_ = MutableStateFlow<Map<UInt, List<FlowItem<T, P>>>>(emptyMap())
+    val flow: StateFlow<Map<UInt, List<FlowItem<T, P>>>> = flow_.asStateFlow()
 
     override suspend fun receive(item: FlowItem<T, P>): Result<Unit> {
         buffer_.getOrPut(item.pad, ::mutableListOf).add(item)
