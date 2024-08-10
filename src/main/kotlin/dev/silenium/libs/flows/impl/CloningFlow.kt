@@ -49,8 +49,9 @@ class CloningFlow<T : Reference<T>>(private val wrapped: Flow<T>? = null) : Flow
     suspend fun publish(value: T): Unit = publishLock.withReentrantLock {
         coroutineScope {
             collectors.map { (_, collector) ->
-                value.clone().getOrThrow().use { item ->
-                    launch { collector.emit(item) }
+                val item = value.clone().getOrThrow()
+                launch {
+                    collector.emit(item)
                 }
             }.joinAll()
         }
