@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    val coroutines = "1.9.0"
+    val coroutines = "1.10.1"
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
 
     val kotest = "5.9.1"
