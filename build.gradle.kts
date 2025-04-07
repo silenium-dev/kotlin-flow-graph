@@ -17,7 +17,7 @@ dependencies {
     val coroutines = "1.10.1"
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines")
 
-    val kotest = "6.0.0.M2"
+    val kotest = "6.0.0.M3"
     testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotest")
     testImplementation("io.kotest:kotest-assertions-core-jvm:$kotest")
     testImplementation("io.kotest:kotest-property-jvm:$kotest")
